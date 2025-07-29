@@ -10,15 +10,15 @@ app.use(express.json());
 // Hardcoded products (10 products as per README.md)
 const products = [
   { id: 1, name: "Laptop", price: 999.99, image: "/laptop.jpg", inStock: true, description: "High-performance laptop", category: "electronics" },
-  { id: 2, name: "T-Shirt", price: 29.99, image: "tshirt.jpg", inStock: true, description: "Comfortable cotton t-shirt", category: "clothing" },
-  { id: 3, name: "Headphones", price: 199.99, image: "headphones.jpg", inStock: false, description: "Wireless headphones", category: "electronics" },
-  { id: 4, name: "Smartphone", price: 699.99, image: "smartphone.jpg", inStock: true, description: "Latest model smartphone", category: "electronics" },
-  { id: 5, name: "Jeans", price: 59.99, image: "/public/jeans.jpg", inStock: true, description: "Stylish denim jeans", category: "clothing" },
-  { id: 6, name: "Smartwatch", price: 249.99, image: "/public/smartwatch.jpg", inStock: true, description: "Fitness tracking smartwatch", category: "electronics" },
-  { id: 7, name: "Jacket", price: 89.99, image: "/public/jacket.jpg", inStock: true, description: "Warm winter jacket", category: "clothing" },
-  { id: 8, name: "Speaker", price: 149.99, image: "/public/speaker.jpg", inStock: true, description: "Bluetooth speaker", category: "electronics" },
-  { id: 9, name: "Sneakers", price: 79.99, image: "/public/sneakers.jpg", inStock: true, description: "Comfortable sneakers", category: "clothing" },
-  { id: 10, name: "Tablet", price: 399.99, image: "/public/tablet.jpg", inStock: true, description: "Portable tablet", category: "electronics" },
+  { id: 2, name: "T-Shirt", price: 29.99, image: "/tshirt.jpg", inStock: true, description: "Comfortable cotton t-shirt", category: "clothing" },
+  { id: 3, name: "Headphones", price: 199.99, image: "/headphones.jpg", inStock: false, description: "Wireless headphones", category: "electronics" },
+  { id: 4, name: "Smartphone", price: 699.99, image: "/smartphone.jpg", inStock: true, description: "Latest model smartphone", category: "electronics" },
+  { id: 5, name: "Jeans", price: 59.99, image: "/jeans.jpg", inStock: true, description: "Stylish denim jeans", category: "clothing" },
+  { id: 6, name: "Smartwatch", price: 249.99, image: "/smartwatch.jpg", inStock: true, description: "Fitness tracking smartwatch", category: "electronics" },
+  { id: 7, name: "Jacket", price: 89.99, image: "/jacket.jpg", inStock: true, description: "Warm winter jacket", category: "clothing" },
+  { id: 8, name: "Speaker", price: 149.99, image: "/speaker.jpg", inStock: true, description: "Bluetooth speaker", category: "electronics" },
+  { id: 9, name: "Sneakers", price: 79.99, image: "/sneakers.jpg", inStock: true, description: "Comfortable sneakers", category: "clothing" },
+  { id: 10, name: "Tablet", price: 399.99, image: "/tablet.jpg", inStock: true, description: "Portable tablet", category: "electronics" },
 ];
 
 // Hardcoded categories for navbar
