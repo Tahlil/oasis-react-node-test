@@ -1,87 +1,60 @@
 const express = require('express');
-const { ApolloServer, gql } = require('apollo-server-express');
+const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3099;
 
-// Hardcoded data (per README.md requirements)
+// Enable CORS to allow frontend (port 5173) to access backend (port 3099)
+app.use(cors());
+app.use(express.json());
+
+// Hardcoded products (10 products as per README.md)
 const products = [
-  { id: 1, name: "Laptop", inStock: true, gallery: ["/public/laptop.jpg"], prices: [{ amount: 999.99, currency: { symbol: "$", label: "USD" } }], attributes: [{ name: "Color", type: "swatch", values: [{ label: "Black", rendered: "<span>Black</span>" }, { label: "Silver", rendered: "<span>Silver</span>" }] }], description: "High-performance laptop", category: "electronics" },
-  { id: 2, name: "T-Shirt", inStock: true, gallery: ["/public/tshirt.jpg"], prices: [{ amount: 29.99, currency: { symbol: "$", label: "USD" } }], attributes: [{ name: "Size", type: "text", values: [{ label: "M", rendered: "M" }, { label: "L", rendered: "L" }] }], description: "Comfortable cotton t-shirt", category: "clothing" },
-  { id: 3, name: "Headphones", inStock: false, gallery: ["/public/headphones.jpg"], prices: [{ amount: 199.99, currency: { symbol: "$", label: "USD" } }], attributes: [], description: "Wireless headphones", category: "electronics" },
-  // Add 7–17 more products to meet the 10–20 requirement
+  { id: 1, name: "Laptop", price: 999.99, image: "/laptop.jpg", inStock: true, description: "High-performance laptop", category: "electronics" },
+  { id: 2, name: "T-Shirt", price: 29.99, image: "tshirt.jpg", inStock: true, description: "Comfortable cotton t-shirt", category: "clothing" },
+  { id: 3, name: "Headphones", price: 199.99, image: "headphones.jpg", inStock: false, description: "Wireless headphones", category: "electronics" },
+  { id: 4, name: "Smartphone", price: 699.99, image: "smartphone.jpg", inStock: true, description: "Latest model smartphone", category: "electronics" },
+  { id: 5, name: "Jeans", price: 59.99, image: "/public/jeans.jpg", inStock: true, description: "Stylish denim jeans", category: "clothing" },
+  { id: 6, name: "Smartwatch", price: 249.99, image: "/public/smartwatch.jpg", inStock: true, description: "Fitness tracking smartwatch", category: "electronics" },
+  { id: 7, name: "Jacket", price: 89.99, image: "/public/jacket.jpg", inStock: true, description: "Warm winter jacket", category: "clothing" },
+  { id: 8, name: "Speaker", price: 149.99, image: "/public/speaker.jpg", inStock: true, description: "Bluetooth speaker", category: "electronics" },
+  { id: 9, name: "Sneakers", price: 79.99, image: "/public/sneakers.jpg", inStock: true, description: "Comfortable sneakers", category: "clothing" },
+  { id: 10, name: "Tablet", price: 399.99, image: "/public/tablet.jpg", inStock: true, description: "Portable tablet", category: "electronics" },
 ];
 
+// Hardcoded categories for navbar
 const categories = [
   { id: "all", name: "ALL" },
   { id: "electronics", name: "Electronics" },
   { id: "clothing", name: "Clothing" },
 ];
 
-// GraphQL Schema
-const typeDefs = gql`
-  type Currency { symbol: String!, label: String! }
-  type Price { amount: Float!, currency: Currency! }
-  type AttributeValue { label: String!, rendered: String! }
-  type Attribute { name: String!, type: String!, values: [AttributeValue!]! }
-  type Product { id: Int!, name: String!, inStock: Boolean!, gallery: [String!]!, prices: [Price!]!, attributes: [Attribute!]!, description: String, category: String, brand: String }
-  type Category { id: String!, name: String! }
-  type ProductsByCategory { categoryName: String!, products: [Product!]! }
-  type OrderProductInput { productId: Int!, quantity: Int!, selectedAttributes: [AttributeInput!]! }
-  type AttributeInput { name: String!, value: String! }
-  type Order { id: Int!, totalPrice: Float!, itemsNumber: Int!, products: [OrderProduct!]! }
-  type OrderProduct { productId: Int!, selectedAttributes: [AttributeInput!]! }
-  type Query {
-    products: [Product!]!
-    categories: [Category!]!
-    productsByCategory(categoryId: String!): ProductsByCategory!
-    product(id: Int!): Product!
+// Routes
+app.get('/api/products', (req, res) => {
+  res.status(200).json({ success: true, products });
+});
+
+app.get('/api/categories', (req, res) => {
+  res.status(200).json({ success: true, categories });
+});
+
+app.get('/api/categories/:categoryId', (req, res) => {
+  const { categoryId } = req.params;
+  const filteredProducts = categoryId === "all" ? products : products.filter(p => p.category === categoryId);
+  const categoryName = categories.find(c => c.id === categoryId)?.name || "Unknown";
+  res.status(200).json({ success: true, categoryName, products: filteredProducts });
+});
+
+app.get('/api/products/:id', (req, res) => {
+  const product = products.find(p => p.id === parseInt(req.params.id));
+  if (!product) {
+    return res.status(404).json({ success: false, error: "Product Not Found" });
   }
-  type Mutation {
-    createOrder(products: [OrderProductInput!]!): Order!
-  }
-`;
+  res.status(200).json({ success: true, product });
+});
 
-// Resolvers
-const resolvers = {
-  Query: {
-    products: () => products,
-    categories: () => categories,
-    productsByCategory: (_, { categoryId }) => ({
-      categoryName: categories.find(c => c.id === categoryId)?.name || "Unknown",
-      products: categoryId === "all" ? products : products.filter(p => p.category === categoryId),
-    }),
-    product: (_, { id }) => products.find(p => p.id === id),
-  },
-  Mutation: {
-    createOrder: (_, { products: orderProducts }) => {
-      const totalPrice = orderProducts.reduce((sum, { productId, quantity }) => {
-        const product = products.find(p => p.id === productId);
-        return product ? sum + product.prices[0].amount * quantity : sum;
-      }, 0);
-      const itemsNumber = orderProducts.reduce((sum, { quantity }) => sum + quantity, 0);
-      return {
-        id: Math.floor(Math.random() * 1000), // Simple random ID
-        totalPrice,
-        itemsNumber,
-        products: orderProducts,
-      };
-    },
-  },
-};
-
-// Start Apollo Server
-async function startServer() {
-  const server = new ApolloServer({ typeDefs, resolvers });
-  await server.start();
-  server.applyMiddleware({ app, path: '/graphql' });
-
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);
-  });
-}
-
-startServer();
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 // Error handling
 process.on('unhandledRejection', (err) => {

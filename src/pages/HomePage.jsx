@@ -1,11 +1,25 @@
 import ProductCard from "../components/ProductCard";
-import { useQuery } from "@apollo/client";
-import { GET_PRODUCTS } from "../graphql/queries";
+import { useState, useEffect } from "react";
 import Spinner from "../components/Spinner";
 
 const HomePage = () => {
-  const { loading, error, data } = useQuery(GET_PRODUCTS);
-  if (error) return <div className="text-center text-red-500">Error! {error.message}</div>;
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data.products);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError('Error loading products');
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <section className="py-10">
       <div className="container">
@@ -13,10 +27,12 @@ const HomePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {loading ? (
             <Spinner loading={loading} />
-          ) : !data || !data.products || data.products.length === 0 ? (
+          ) : error ? (
+            <p className="text-center text-red-500">{error}</p>
+          ) : !products.length ? (
             <p className="text-center text-gray-500">No products available</p>
           ) : (
-            data.products.map((product) => (
+            products.map((product) => (
               <ProductCard product={product} key={product.id} />
             ))
           )}
